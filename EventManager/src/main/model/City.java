@@ -13,7 +13,7 @@ public class City {
 		
 	}
 
-	public String getIme() {
+	public String getName() {
 		return name;
 	}
 

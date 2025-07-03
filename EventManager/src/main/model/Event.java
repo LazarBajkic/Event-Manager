@@ -1,11 +1,14 @@
 package main.model;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Event {
 	
 	private String name;
 	private Type eventType;
+	private List<Participant> participants;
+	
 
 	public Event(String name,Type eventType) {
 		super();
@@ -27,6 +30,14 @@ public class Event {
 
 	public void setEventType(Type eventType) {
 		this.eventType = eventType;
+	}
+
+	public List<Participant> getParticipants() {
+		return participants;
+	}
+
+	public void setParticipants(List<Participant> participants) {
+		this.participants = participants;
 	}
 
 	@Override
