@@ -1,9 +1,0 @@
-/**
- * 
- */
-/**
- * @author bojan
- *
- */
-module EventManager {
-}

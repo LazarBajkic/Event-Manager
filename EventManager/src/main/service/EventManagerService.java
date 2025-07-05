@@ -13,10 +13,12 @@ import main.model.Event;
 import main.model.Participant;
 import main.exceptions.CityNotFoundException;
 import main.exceptions.DuplicateCityException;
+import main.exceptions.DuplicateEventException;
 import main.exceptions.EventNotFoundException;
 import main.exceptions.NoEventsFoundException;
 import main.exceptions.NullEventException;
 import main.exceptions.NullParticipantException;
+import main.exceptions.ParticipantAlreadyRegisteredException;
 import main.model.City;
 import main.model.Type;
 
@@ -49,11 +51,15 @@ public class EventManagerService {
 		if(cityName == null || cityName.isBlank()) {
 			throw new CityNotFoundException("City name cannot be blank.");
 		}
-			
+		
 		if(e==null) {
 			throw new NullEventException("Event cannot be null");
 		}
 		
+		if(findEventByName(e.getName()).isPresent()) {
+			throw new DuplicateEventException("The event "+e.getName()+" is already registered");
+		}
+			
 		Optional<City> cityOpt = findCityByName(cityName);
 	    if (cityOpt.isEmpty()) {
 	        return "The specified city is not in our records";
@@ -79,6 +85,10 @@ public class EventManagerService {
 		    if (eventOpt.isEmpty()) {
 		        return "The specified event is not in our records";
 		    }
+		
+		if(findEventByName(eventName).get().getParticipants().contains(p)) {
+			throw new ParticipantAlreadyRegisteredException("This participant has already registere for this event.");
+		}
 		
 		participants.add(p);
 		participantsPerEvent.computeIfAbsent(eventOpt.get(), g -> new ArrayList<>()).add(p);
@@ -124,10 +134,19 @@ public class EventManagerService {
 	}
 	
 	public void returningParticipants() {
+		
+		 if (eventsInCities == null || eventsInCities.isEmpty()) {
+		      throw new NoDataAvailableException("No events or cities available for processing.");
+		 }
+		
+		 
 		eventsInCities.entrySet().stream().map(entry -> {
 	        City grad = entry.getKey();
 	        List<Event> events = entry.getValue();
 	        
+	        if (events == null || events.isEmpty()) {
+                throw new NoEventsInCityException("City " + grad.getName() + " has no registered events.");
+            }
 	        
 	        Map<Participant, Long> numberOfAppearences = events.stream()
 	            .flatMap(e -> participantsPerEvent.getOrDefault(e, List.of()).stream())
@@ -146,5 +165,15 @@ public class EventManagerService {
 		    e.getValue().forEach(System.out::println);
 		});
 	}
+
+	public Map<City, List<Event>> getEventsInCities() {
+		return eventsInCities;
+	}
+
+	public Map<Event, List<Participant>> getParticipantsPerEvent() {
+		return participantsPerEvent;
+	}
+
+		
 	
 }
